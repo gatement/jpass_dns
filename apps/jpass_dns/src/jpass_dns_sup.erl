@@ -3,7 +3,6 @@
 -behaviour(supervisor).
 
 -export([start_link/0]).
-
 -export([init/1]).
 
 -define(SERVER, ?MODULE).
@@ -17,10 +16,17 @@ init([]) ->
     SupFlags = #{strategy => one_for_all,
                  intensity => 0,
                  period => 1},
-    ChildSpecs = [#{id => jpass_dns_tcp_server,
-		    start => {gen_server, start_link, [jpass_dns_tcp_server, [], []]},
+    ChildSpecs = [#{id => jpass_dns_server_listener,
+		    start => {jpass_dns_server_listener, start_link, []},
 		    restart => permanent,
 		    shutdown => brutal_kill,
 		    type => worker,
-		    modules => [jpass_dns_tcp_server]}],
+		    modules => [jpass_dns_server_listener]},
+                  #{id => jpass_dns_sup_conns,
+		    start => {jpass_dns_sup_conns, start_link, []},
+		    restart => permanent,
+		    shutdown => brutal_kill,
+		    type => supervisor,
+		    modules => [jpass_dns_sup_conns]}
+    ],
     {ok, {SupFlags, ChildSpecs}}.
