@@ -1,0 +1,15 @@
+{application, jpass_dns,
+ [{description, "jPass DNS proxy (tcp <=> udp)"},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {mod, {jpass_dns_app, []}},
+  {applications,
+   [kernel,
+    stdlib
+   ]},
+  {env,[]},
+  {modules, []},
+
+  {licenses, ["Apache 2.0"]},
+  {links, []}
+ ]}.

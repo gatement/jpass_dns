@@ -1,0 +1,6 @@
+-sname jpass_dns
+
+-setcookie jpass_dns_cookie
+
++K true
++A30
