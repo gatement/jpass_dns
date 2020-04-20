@@ -25,8 +25,4 @@ init([]) ->
     {ok, {SupFlags, ChildSpecs}}.
 
 start_child(Socket) ->
-    case supervisor:start_child(?SERVER, [Socket]) of
-        {ok, _Child} -> ignore;
-        {error, Reason} -> io:format("jpass_dns_sup_conns:start_child() error: ~p~n", [Reason])
-    end,
-    ok.
+    supervisor:start_child(?SERVER, [Socket]).
