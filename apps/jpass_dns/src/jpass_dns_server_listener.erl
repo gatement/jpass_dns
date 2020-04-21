@@ -5,7 +5,7 @@
 -export([start_link/0]).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, handle_continue/2, code_change/3, format_status/2, terminate/2]).
 
--record(state, {server_socket=undefined}).
+-record(state, {server_socket=undefined, conn=undefined}).
 
 -define(SERVER, ?MODULE).
 
@@ -15,44 +15,45 @@ start_link() ->
 
 init([]) ->
     io:format("jpass_dns_server_listener:init()~n"),
-    {ok, #state{}, 100}.
+    {ok, #state{}, 1}.
 
 handle_call(Request, From, State) ->
     io:format("jpass_dns_server_listener:handle_call() request=~p, from=~p, state=~p~n", [Request, From, State]),
-    {reply, my_reply, tate}.
+    {reply, my_reply, State, 0}.
     
 handle_cast(Request, State) ->
     io:format("jpass_dns_server_listener:handle_cast() request=~p, state=~p~n", [Request, State]),
-    {noreply, State}.
+    {noreply, State, 0}.
 
 handle_info(Info, State) ->
     case Info of
         timeout -> 
             if State#state.server_socket == undefined ->
                 ServerSocket = init_tcp_server(), 
-                {noreply, State#state{server_socket = ServerSocket}, 0};
-            true -> 
+               {noreply, State#state{server_socket = ServerSocket}, 0};
+            %State#state.conn == undefined -> 
+            true ->
                 {ok, Socket} = gen_tcp:accept(State#state.server_socket),
-                io:format("get socket: ~p~n", [Socket]),
                 {ok, ChildPid} = jpass_dns_sup_conns:start_child(Socket),
                 ok = gen_tcp:controlling_process(Socket, ChildPid),
                 jpass_dns_server_conn:hand_off(ChildPid),
+                %{noreply, State, 0}
                 {noreply, State}
             end;
        {tcp_closed, _} ->
-            ignore; 
+	   {noreply, State, 0};
         _ ->
            io:format("jpass_dns_server_listener:handle_info() info=~p, state=~p~n", [Info, State]),
-	   {noreply, State}
+	   {noreply, State, 0}
     end.
 
 handle_continue(_Continue, State) ->
     io:format("jpass_dns_server_listener:handle_continue() continue=~p, state=~p~n", [_Continue, State]),
-    {noreply, State}.
+    {noreply, State, 0}.
     
 code_change(_OldVsn, State, _Extra) -> 
     %io:format("jpass_dns_server_listener:code_change() oldVsn=~p, state=~p, extra=~p~n", [_OldVsn, _State, _Extra]),
-    {ok, State}.
+    {ok, State, 0}.
 
 format_status(_Opt, [_PDict, _State]) ->
     %io:format("jpass_dns_server_listener:format_status() opt=~p, pdict=~p, state=~p~n", [_Opt, _PDict, _State]),
@@ -65,6 +66,6 @@ terminate(Reason, _State) ->
 %% return server socket
 init_tcp_server() ->
     Port = erlang:list_to_integer(os:getenv("JPASS_TCP_PORT", "53")),
-    {ok, ServerSocket} = gen_tcp:listen(Port, [binary, {packet, 2}, {ifaddr, loopback}, {reuseaddr, true}, {active, false}]),
+    {ok, ServerSocket} = gen_tcp:listen(Port, [binary, {packet, 0}, {ifaddr, loopback}, {reuseaddr, true}, {active, false}]),
     io:format("TCP server is listening on ~p~n", [Port]),
     ServerSocket.

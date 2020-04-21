@@ -21,9 +21,10 @@ handle_call(Request, From, State) ->
     {reply, my_reply, State}.
     
 handle_cast(Request, State) ->
+    Socket = State#state.socket,
     case Request of
         hand_off ->
-            ok = inet:setopts(State#state.socket, [{active, true}]);
+            ok = inet:setopts(Socket, [{active, true}]);
         _ ->
 	    io:format("jpass_dns_server_conn:handle_cast() request=~p, state=~p~n", [Request, State]),
             ignore
@@ -31,8 +32,11 @@ handle_cast(Request, State) ->
     {noreply, State}.
 
 handle_info(Info, State) ->
+    Socket = State#state.socket,
     case Info of
-       {tcp_closed, _} ->
+        {tcp, Socket, DataBin} ->
+            io:format("recvd: ~p~n", [DataBin]);
+        {tcp_closed, _} ->
           ok = gen_tcp:close(State#state.socket),
           ok = gen_server:stop(erlang:self());
         _ ->
