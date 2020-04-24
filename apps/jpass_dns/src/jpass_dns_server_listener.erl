@@ -67,6 +67,6 @@ terminate(Reason, _State) ->
 %% return server socket
 init_tcp_server() ->
     Port = erlang:list_to_integer(os:getenv("JPASS_TCP_PORT", "53")),
-    {ok, ServerSocket} = gen_tcp:listen(Port, [binary, {packet, 0}, {ifaddr, loopback}, {reuseaddr, true}, {active, false}]),
+    {ok, ServerSocket} = gen_tcp:listen(Port, [binary, {packet, 2}, {ifaddr, loopback}, {reuseaddr, true}, {active, false}]),
     io:format("TCP server is listening on ~p~n", [Port]),
     ServerSocket.
