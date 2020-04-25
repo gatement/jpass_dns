@@ -9,7 +9,7 @@ Build
 
 Run
 -----
-    $ export JPASS_TCP_PORT=53 && rebar3 shell
+    $ export JPASS_TCP_PORT=53 && export DNS_SERVER=8.8.8.8 && export DNS_PORT=53 && rebar3 shell
 
 Release
 -----
@@ -18,3 +18,5 @@ Release
 Env settings
 -----
     $ JPASS_TCP_PORT = 53
+    $ DNS_SERVER = 8.8.4.4 
+    $ DNS_PORT = 53 
