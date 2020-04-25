@@ -14,8 +14,8 @@ start_link() ->
 init([]) ->
     io:format("jpass_dns_sup:init()~n"),
     SupFlags = #{strategy => one_for_all,
-                 intensity => 0,
-                 period => 1},
+                 intensity => 100,
+                 period => 10000},
     ChildSpecs = [#{id => jpass_dns_server_listener,
 		    start => {jpass_dns_server_listener, start_link, []},
 		    restart => permanent,
